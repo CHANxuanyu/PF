@@ -17,7 +17,7 @@ from copy import deepcopy
 from scipy.cluster.hierarchy import linkage, fcluster
 from sklearn.metrics import pairwise_distances_argmin_min
 
-import metis
+# import metis
 from scipy import sparse
 
 
@@ -103,41 +103,41 @@ def rungekutta4(x, dt, F):
     return x
 
 
-def metis_partition(cov_matrix, nb_partitions, balance_tol=0.1):
-    """
-    METIS( metis 0.2a2 version ）
-    """
-    # 相关性并转换为相似度权重
-    correlation = np.abs(correlation_from_covariance(cov_matrix))
-    np.fill_diagonal(correlation, 0)
-    similarity = (correlation * 1000).astype(int)
+# def metis_partition(cov_matrix, nb_partitions, balance_tol=0.1):
+#     """
+#     METIS( metis 0.2a2 version ）
+#     """
+#     # 相关性并转换为相似度权重
+#     correlation = np.abs(correlation_from_covariance(cov_matrix))
+#     np.fill_diagonal(correlation, 0)
+#     similarity = (correlation * 1000).astype(int)
     
-    # 构建带权邻接表
-    adj_list = []
-    for i in range(similarity.shape[0]):
-        neighbors = []
-        for j in range(similarity.shape[1]):
-            if i != j and similarity[i, j] > 0:
-                neighbors.append((j, similarity[i, j]))
-        adj_list.append(neighbors)
+#     # 构建带权邻接表
+#     adj_list = []
+#     for i in range(similarity.shape[0]):
+#         neighbors = []
+#         for j in range(similarity.shape[1]):
+#             if i != j and similarity[i, j] > 0:
+#                 neighbors.append((j, similarity[i, j]))
+#         adj_list.append(neighbors)
     
-    # 转换为METIS图对象
-    graph = metis.adjlist_to_metis(adj_list)
+#     # 转换为METIS图对象
+#     graph = metis.adjlist_to_metis(adj_list)
     
-    # 分区参数配置（metis 0.2a2 version）
-    options = {
-        'contig': True,                        # 强制连续分区
-        'ufactor': int(balance_tol * 100),      # 平衡  
-        'objtype': 'cut'                        # min cut
-    }
+#     # 分区参数配置（metis 0.2a2 version）
+#     options = {
+#         'contig': True,                        # 强制连续分区
+#         'ufactor': int(balance_tol * 100),      # 平衡  
+#         'objtype': 'cut'                        # min cut
+#     }
     
-    # 执行分区
-    _, parts = metis.part_graph(
-        graph,
-        nparts=nb_partitions,
-        **options
-    )
-    return np.array(parts)
+#     # 执行分区
+#     _, parts = metis.part_graph(
+#         graph,
+#         nparts=nb_partitions,
+#         **options
+#     )
+#     return np.array(parts)
 
 
 # Paramters
@@ -164,7 +164,7 @@ Np = 1000      # Number of particles
 X = zeros((dim_x, N))
 Y = zeros((dim_y, N))
 
-Nb = 6  # Number of blocks
+Nb = 20  # Number of blocks
 block_size = math.ceil(dim_x / Nb)
 
 cwd = os.getcwd()
@@ -232,7 +232,7 @@ for k in range(Ns):
         model = hdbscan.HDBSCAN(
             metric='precomputed',
             min_cluster_size=2,
-            min_samples=2,
+            min_samples=1,
             cluster_selection_method='eom'
             # prediction_data=True
         )

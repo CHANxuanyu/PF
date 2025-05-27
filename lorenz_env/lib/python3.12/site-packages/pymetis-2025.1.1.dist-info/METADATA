@@ -1,0 +1,153 @@
+Metadata-Version: 2.1
+Name: pymetis
+Version: 2025.1.1
+Summary: A graph partitioning package
+Author-Email: Andreas Kloeckner <inform@tiker.net>
+Maintainer-Email: Andreas Kloeckner <inform@tiker.net>
+License: Copyright Notice for METIS
+         --------------------------
+         
+         Copyright 1995-2013, Regents of the University of Minnesota
+         
+         Licensed under the Apache License, Version 2.0 (the "License");
+         you may not use this file except in compliance with the License.
+         You may obtain a copy of the License at
+         
+         http://www.apache.org/licenses/LICENSE-2.0
+         
+         Unless required by applicable law or agreed to in writing, software
+         distributed under the License is distributed on an "AS IS" BASIS,
+         WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+         implied. See the License for the specific language governing
+         permissions and limitations under the License.
+         
+         Copyright Notice for the Wrapper
+         --------------------------------
+         
+         The wrapper is licensed to you under the following terms:
+         
+         Copyright (c) 2007-2008 Andreas Kloeckner
+         
+         Permission is hereby granted, free of charge, to any person obtaining a copy of
+         this software and associated documentation files (the "Software"), to deal in
+         the Software without restriction, including without limitation the rights to
+         use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+         of the Software, and to permit persons to whom the Software is furnished to do
+         so, subject to the following conditions:
+         
+         The above copyright notice and this permission notice shall be included in all
+         copies or substantial portions of the Software.
+         
+         THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+         IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+         FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+         AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+         LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+         SOFTWARE.
+         
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Other Audience
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: C
+Classifier: Programming Language :: C++
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Topic :: Multimedia :: Graphics :: 3D Modeling
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Scientific/Engineering :: Mathematics
+Classifier: Topic :: Scientific/Engineering :: Visualization
+Classifier: Topic :: Software Development :: Libraries
+Project-URL: Documentation, https://documen.tician.de/pymetis
+Project-URL: Repository, https://github.com/inducer/pymetis
+Requires-Python: >=3.10
+Requires-Dist: numpy
+Provides-Extra: doc
+Requires-Dist: furo; extra == "doc"
+Requires-Dist: sphinx>=4; extra == "doc"
+Requires-Dist: sphinx-copybutton; extra == "doc"
+Provides-Extra: test
+Requires-Dist: meshpy; extra == "test"
+Requires-Dist: pytest; extra == "test"
+Requires-Dist: ruff; extra == "test"
+Requires-Dist: typos; extra == "test"
+Description-Content-Type: text/x-rst
+
+PyMetis: A Python Wrapper for METIS
+===================================
+
+.. image:: https://gitlab.tiker.net/inducer/pymetis/badges/main/pipeline.svg
+    :alt: Gitlab Build Status
+    :target: https://gitlab.tiker.net/inducer/pymetis/commits/main
+.. image:: https://github.com/inducer/pymetis/workflows/CI/badge.svg?branch=main
+    :alt: Github Build Status
+    :target: https://github.com/inducer/pymetis/actions?query=branch%3Amain+workflow%3ACI
+.. image:: https://badge.fury.io/py/PyMetis.png
+    :alt: Python Package Index Release Page
+    :target: https://pypi.org/project/pymetis/
+.. image:: https://zenodo.org/badge/2199177.svg
+    :alt: Zenodo DOI for latest release
+    :target: https://zenodo.org/badge/latestdoi/2199177
+
+PyMetis is a Python wrapper for the `Metis
+<http://glaros.dtc.umn.edu/gkhome/views/metis>`_ graph partitioning software
+by George Karypis, Vipin Kumar and others. It includes version 5.1.0 of Metis
+and wraps it using the `Pybind11 <https://pybind11.readthedocs.io/en/stable/>`_
+wrapper generator library. So far, it only wraps the most basic graph
+partitioning functionality (which is enough for my current use), but extending
+it in case you need more should be quite straightforward. Using PyMetis to
+partition your meshes is really easy--essentially all you need to pass into
+PyMetis is an adjacency list for the graph and the number of parts you would
+like.
+
+Links
+-----
+
+* `Documentation <https://documen.tician.de/pymetis>`__ (read how things work)
+* `Conda Forge <https://anaconda.org/conda-forge/pymetis>`_ (download binary packages for Linux, macOS, Windows)
+* `Python package index <https://pypi.python.org/pypi/pymetis>`_ (download releases)
+* `C. Gohlke's Windows binaries <https://www.lfd.uci.edu/~gohlke/pythonlibs/#pymetis>`_ (download Windows binaries)
+* `Github <https://github.com/inducer/pymetis>`_ (get latest source code, file bugs)
+
+Installation
+------------
+
+The following line should do the job::
+
+    pip install pymetis
+
+Quick Start
+-----------
+
+This graph, adapted from Figure 2 of the Metis
+`manual <http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/manual.pdf>`_ to
+use zero-based indexing,
+
+.. image:: doc/_static/tiny_01.png
+
+can be defined and partitioned into two graphs with
+
+.. code:: python
+
+    import numpy as np
+    import pymetis
+    adjacency_list = [np.array([4, 2, 1]),
+                      np.array([0, 2, 3]),
+                      np.array([4, 3, 1, 0]),
+                      np.array([1, 2, 5, 6]),
+                      np.array([0, 2, 5]),
+                      np.array([4, 3, 6]),
+                      np.array([5, 3])]
+    n_cuts, membership = pymetis.part_graph(2, adjacency=adjacency_list)
+    # n_cuts = 3
+    # membership = [1, 1, 1, 0, 1, 0, 0]
+
+    nodes_part_0 = np.argwhere(np.array(membership) == 0).ravel() # [3, 5, 6]
+    nodes_part_1 = np.argwhere(np.array(membership) == 1).ravel() # [0, 1, 2, 4]
+
+.. image:: doc/_static/tiny_01_partitioned.png
+
