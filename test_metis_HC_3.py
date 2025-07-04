@@ -209,7 +209,17 @@ Np = 1000      # Number of particles
 X = zeros((dim_x, N))
 Y = zeros((dim_y, N))
 
-Nb = 20  # Number of blocks
+# # Initial state
+# x = multivariate_normal(mean0, Cov0) 
+# for t in range(N):
+#     # State
+#     x = rungekutta4(x, dt, F) + multivariate_normal(zeros(dim_x), Q)
+#     X[:, t] = x
+#     # Observation
+#     # y_t = H * x_t + v_t ,  v_t ~ N(0, R)
+#     Y[:, t] = dot(H, X[:, t]) + multivariate_normal(zeros(dim_y), R)
+
+Nb = 16  # Number of blocks
 block_size = math.ceil(dim_x / Nb)
 
 cwd = os.getcwd()
